@@ -1,0 +1,28 @@
+//입력받은 수까지 소수의 합 구하기
+
+func prime(int n, int a):
+    if a > 1:
+        if n % a == 0:
+            return 0
+        else:
+            return prime(n, a - 1)
+    else:
+        return 1
+
+func is_prime(int n):
+    if n > 1:
+        return prime(n, n - 1)
+    else:
+        return 0
+
+func repet(int n, int s):
+    if n > 0:
+        if is_prime(n):
+            return repet(n - 1, s + n)
+        return repet(n - 1, s)
+    else:
+        return s
+
+func main():
+    int n = int(gets())
+    repet(n, 0)
