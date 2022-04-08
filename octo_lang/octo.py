@@ -219,7 +219,7 @@ class octo_lang:
         print('Error occurred in line {0} : {1}'.format(line_number, reason))
         sys.exit()
 
-with open('prime.octo', 'r', encoding = 'utf-8') as f:
+with open('octo_lang\prime.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
 
 octo = octo_lang(code)
