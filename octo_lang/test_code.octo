@@ -1,5 +1,5 @@
 func hello():
-    puts('hello world!')
+    puts('//hello world!')
 
 func repet(int n):
     if n > 0:

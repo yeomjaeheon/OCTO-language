@@ -6,6 +6,7 @@ import sys
 진행상황 : 토큰 추출 구현 완료
 
 *토큰 분석 단계에서 indent 오류를 잡아주는 기능 구현할 것
+*문자열 안에서는 주석처리 되지 않도록 할 것.
 *빈 줄에 대해서는 indent가 맞지 않더라도 오류로 처리하지 않는 예외 처리 넣어줄 것
 *실제 처리 과정에서 변수와 함수를 구분하지 말 것(변수는 사실상 상수함수와 다르지 않으므로)
 '''
@@ -219,7 +220,7 @@ class octo_lang:
         print('Error occurred in line {0} : {1}'.format(line_number, reason))
         sys.exit()
 
-with open('octo_lang\prime.octo', 'r', encoding = 'utf-8') as f:
+with open('octo_lang\\test_code.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
 
 octo = octo_lang(code)
