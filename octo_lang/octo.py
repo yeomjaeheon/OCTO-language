@@ -87,17 +87,18 @@ class octo_lang:
                     line_counter = i + 1
                     break
             #주석 처리
-            for k in self.ignore_keyword.keys(): #주석 처리 규칙에서 주석 처리 시작 문자열을 가지고 옴
-                if chr_pointer < len(self.code) - (len(k) - 1):
-                    if self.code[chr_pointer : chr_pointer + len(k)] == k:
-                        while chr_pointer < len(self.code):
-                            #현재 코드 포인터가 가리키는 위치에서 앞쪽으로 주석 처리 종료 문자열이 등장하는지 검사
-                            if chr_pointer >= len(self.ignore_keyword[k]) - 1:
-                                #주석 처리 종료 문자열을 만났을 경우
-                                if self.code[chr_pointer - (len(self.ignore_keyword[k]) - 1) : chr_pointer + 1] == self.ignore_keyword[k]:
-                                    chr_pointer += 1
-                                    break
-                            chr_pointer += 1
+            if not string_start:
+                for k in self.ignore_keyword.keys(): #주석 처리 규칙에서 주석 처리 시작 문자열을 가지고 옴
+                    if chr_pointer < len(self.code) - (len(k) - 1):
+                        if self.code[chr_pointer : chr_pointer + len(k)] == k:
+                            while chr_pointer < len(self.code):
+                                #현재 코드 포인터가 가리키는 위치에서 앞쪽으로 주석 처리 종료 문자열이 등장하는지 검사
+                                if chr_pointer >= len(self.ignore_keyword[k]) - 1:
+                                    #주석 처리 종료 문자열을 만났을 경우
+                                    if self.code[chr_pointer - (len(self.ignore_keyword[k]) - 1) : chr_pointer + 1] == self.ignore_keyword[k]:
+                                        chr_pointer += 1
+                                        break
+                                chr_pointer += 1
 
             indent_check = False #들여쓰기 검사 여부
             if len(self.token) == 0:
