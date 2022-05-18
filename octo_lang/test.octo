@@ -1,6 +1,4 @@
-//입력받은 수까지 소수의 합 구하기
-
-func prime(int n, int a):
+func prime(n, a):
     if a > 1:
         if n % a == 0:
             return 0
@@ -9,13 +7,13 @@ func prime(int n, int a):
     else:
         return 1
 
-func is_prime(int n):
+func is_prime(n):
     if n > 1:
         return prime(n, n - 1)
     else:
         return 0
 
-func repet(int n, int s):
+func repet(n, s):
     if n > 0:
         if is_prime(n):
             return repet(n - 1, s + n)
@@ -24,5 +22,5 @@ func repet(int n, int s):
         return s
 
 func main():
-    int n = int(gets())
+    n = 100
     repet(n, 0)
