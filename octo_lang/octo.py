@@ -144,7 +144,7 @@ with open('test.octo', 'r', encoding = 'utf-8') as f:
 
 octo = octo_lang_core(code)
 octo.tokenize()
-octo.analyze()
+#octo.analyze()
 for t in octo.tokens:
     if t[1] != 'space_indent':
         print(t[0], end = ' ')
