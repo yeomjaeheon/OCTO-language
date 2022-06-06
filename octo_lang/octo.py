@@ -99,7 +99,7 @@ class octo_lang_core:
                 if self.text_match(ignore):
                     while self.space_match(len(self.ignore_codes[ignore])) and not self.text_match(self.ignore_codes[ignore]):
                         self.chr_pointer += 1
-                    self.chr_pointer += len(self.ignore_codes[ignore])
+                    #self.chr_pointer += len(self.ignore_codes[ignore]) <- 이 부분은 없애야 하는 듯(일단은 혹시 모르니 남겨둘 것)
 
             #키워드 추출
             for keyword in self.keywords.keys():
@@ -135,9 +135,7 @@ class octo_lang_core:
 
     #추출된 토큰에서 각 함수의 정의를 추출
     def analyze(self):
-        token_pointer = 0
-        while token_pointer < len(self.tokens):
-            pass
+        pass
 
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()

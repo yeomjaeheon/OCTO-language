@@ -1,4 +1,4 @@
-//func prime(n, a):
+func prime(n, a):
     if a > 1:
         if n % a == 0:
             return 0
