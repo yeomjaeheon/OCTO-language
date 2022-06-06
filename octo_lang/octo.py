@@ -1,11 +1,13 @@
-#진행상황 : 토큰 분석 기능 완료, 브레인퍽 코드 생성 부분 구현할 것
+#진행상황 : 토큰 분석 기능 완료
 #변수도 함수로 간주하기, 조건문 안에 들어있는 코드도 함수로 간주, 모든 것을 함수로 간주
 
 class function:
-    def __init__(self, name, parameter_names, tokens):
+    def __init__(self, name, tokens):
         self.name = name
-        self.parameter_names = parameter_names
         self.tokens = tokens
+        #매개변수 추출 기능 추가할 것
+
+        #self.parameter_names = parameter_names
 
     def extract_inner_functions(self):
         pass
@@ -58,7 +60,8 @@ class octo_lang_core:
             }
 
         self.processing_state = {
-            'keyword_match' : False
+            'keyword_match' : False, 
+            'function_extraction' : False
         }
 
     def name_valid(self, name):
@@ -135,7 +138,35 @@ class octo_lang_core:
 
     #추출된 토큰에서 각 함수의 정의를 추출
     def analyze(self):
-        pass
+        token_pointer = 0
+        tmp_space_indent = 0
+        tmp_definition = []
+        while token_pointer < len(self.tokens):
+            if self.processing_state['function_extraction']:
+                tmp_definition.append(self.tokens[token_pointer])
+                if self.tokens[token_pointer][1] == 'space_indent':
+                    if self.tokens[token_pointer][0] == tmp_space_indent:
+                        tmp_space_indent = self.tokens[token_pointer][0]
+                        tmp_function_name = tmp_definition[0][0]
+                        self.functions[tmp_function_name] = function(tmp_function_name, tmp_definition)
+                        tmp_definition = []
+                        self.processing_state['function_extraction'] = False
+
+            else:
+                if self.tokens[token_pointer][1] == 'space_indent':
+                    tmp_space_indent = self.tokens[token_pointer][0]
+
+                if self.tokens[token_pointer] == self.keywords['func']:
+                    self.processing_state['function_extraction'] = True
+
+            token_pointer += 1
+    
+        if len(tmp_definition) > 0:
+            tmp_function_name = tmp_definition[0][0]
+            self.functions[tmp_function_name] = function(tmp_function_name, tmp_definition)
+            tmp_definition = []
+            self.processing_state['function_extraction'] = False
+
 
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
@@ -143,9 +174,14 @@ with open('test.octo', 'r', encoding = 'utf-8') as f:
 octo = octo_lang_core(code)
 octo.tokenize()
 print(octo.tokens)
-#octo.analyze()
+octo.analyze()
 for t in octo.tokens:
     if t[1] != 'space_indent':
         print(t[0], end = ' ')
     else:
         print(' ' * t[0], end = '')
+
+print()
+print()
+for k in octo.functions.keys():
+    print(octo.functions[k].tokens)
