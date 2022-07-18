@@ -74,13 +74,19 @@ class octo_lang:
                     self.found_keyword = True
                     self.tokens.append([word, self.classify_word(word)])
                     break
-            #키워드가 추출된 경우 이전에 추출된 식별자나 숫자를 처리
+
+            #키워드가 추출된 경우 이전에 추출된 식별자나 숫자를 처리, 고쳐야 할 것 워드 간에 적당히 끊어주는 기능
+            def append_word():
+                if self.word_tmp != '':
+                    self.word_type = self.classify_word(self.word_tmp)
+                    self.tokens.append([self.word_tmp, self.word_type])
+
             if self.found_keyword:
                 self.found_keyword = False
+                append_word()
             #키워드가 추출되지 않았을 경우 식별자나 숫자를 추출
             else:
                 pass
-            self.chr_pointer += 1
 
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
