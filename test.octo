@@ -1,30 +1,33 @@
 //print 정의는 생략함(기본 기능을 이용해 octo 내부에서 구현할 예정)
+//return
+/*
 
-def find_prime(n, result)
-	def is_prime(n)
-		def check(n, a)
-			if a > 1
-				if n % a == 0
+def find_prime(n, result):
+	def is_prime(n):
+		def check(n, a):
+			if a > 1:
+				if n % a == 0:
 					return 0
-				else
+				else:
 					return check(n, a - 1)
-			else
+			else:
 				return 1
 				
-		if n > 1
+		if n > 1:
 			return check(n, n - 1)
-		else
+		else:
 			return 0
+*/
 			
-	if n > 1
-		if is_prime(n)
+	if n > 1:
+		if is_prime(n):
 			return find_prime(n - 1, result + [n])
-		else
+		else:
 			return find_prime(n - 1, result)
-	else
+	else:
 		return result
 		
-def main()
+def main():
 	n = 100
 	prime_numbers = find_prime(n)
 	print(*prime_numbers)
