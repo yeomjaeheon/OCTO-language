@@ -18,7 +18,7 @@ def find_prime(n, result):
 		else:
 			return 0
 */
-			
+
 	if n > 1:
 		if is_prime(n):
 			return find_prime(n - 1, result + [n])

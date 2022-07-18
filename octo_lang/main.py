@@ -56,11 +56,17 @@ class octo_lang:
         self.word_type = None
         while self.chr_pointer < len(self.code):
             #주석 처리
+            recheck = False
             for com in self.comments.keys():
                 if self.match_word(com):
                     while not self.match_word(self.comments[com]):
                         self.chr_pointer += 1
                     self.chr_pointer += len(self.comments[com])
+                    recheck = True
+                    break
+            #주석 처리가 일어났다면 while 루프 처음으로 복귀
+            if recheck:
+                continue
             #키워드 확인
             for word in self.keyword:
                 if self.match_keyword(word):
@@ -68,13 +74,13 @@ class octo_lang:
                     self.found_keyword = True
                     self.tokens.append([word, self.classify_word(word)])
                     break
-            self.chr_pointer += 1
             #키워드가 추출된 경우 이전에 추출된 식별자나 숫자를 처리
             if self.found_keyword:
-                pass
+                self.found_keyword = False
             #키워드가 추출되지 않았을 경우 식별자나 숫자를 추출
             else:
                 pass
+            self.chr_pointer += 1
 
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
