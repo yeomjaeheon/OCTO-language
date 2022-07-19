@@ -1,4 +1,5 @@
 from ast import keyword
+from xmlrpc.client import FastParser
 
 
 class octo_lang:
@@ -41,10 +42,12 @@ class octo_lang:
                 return 'operator'
             elif word in ['=!', '==', '<', '>', '<=', '>=']:
                 return 'compare_operator'
+            elif word in [',']:
+                return 'comma'
 
     def __init__(self, code):
         self.code = code + ' ' #chr_pointer 가산에 예외처리를 하지 않기 위해 플레이스홀더로 스페이스 추가
-        self.keyword = ['def', 'main', ':', 'return', 'if', 'else', 'elif', '(', ')', '[', ']', '==', '!=', '<=', '>=', '<', '>', '+', '-', '*', '/', '%', '=', 'and', 'or', 'not']
+        self.keyword = ['def', 'main', ':', ',', 'return', 'if', 'else', 'elif', '(', ')', '[', ']', '==', '!=', '<=', '>=', '<', '>', '+', '-', '*', '/', '%', '=', 'and', 'or', 'not']
         self.comments = {'//' : '\n', '/*' : '*/'}
         self.number = [chr(i) for i in range(48, 58)]
         self.character = [chr(i) for i in range(65, 91)] + [chr(i) for i in range(97, 123)] + ['_']
@@ -54,6 +57,7 @@ class octo_lang:
         self.found_keyword = False
         self.word_tmp = ''
         self.word_type = None
+        self.found_newline = False
         while self.chr_pointer < len(self.code):
             #주석 처리
             recheck = False
@@ -67,26 +71,60 @@ class octo_lang:
             #주석 처리가 일어났다면 while 루프 처음으로 복귀
             if recheck:
                 continue
+
+            #들여쓰기 처리
+            if self.found_newline:
+                if self.code[self.chr_pointer] == ' ':
+                    print('!!!')
+                self.found_newline = False
+                space_tmp = 0
+                while self.match_word(' '):
+                    space_tmp += 1
+                    self.chr_pointer += 1
+                self.tokens.append([space_tmp, 'indent'])
+            if self.code[self.chr_pointer] == '\n':
+                self.found_newline = True
+            #워드 처리를 위한 내부 함수
+            def append_word():
+                if self.word_tmp != '':
+                    self.word_type = self.classify_word(self.word_tmp)
+                    self.tokens.append([self.word_tmp, self.word_type])
+                    self.word_type = None
+
             #키워드 확인
             for word in self.keyword:
                 if self.match_keyword(word):
                     self.chr_pointer += (len(word) - 1)
                     self.found_keyword = True
+                    #키워드가 추출된 경우 이전에 추출된 식별자나 숫자를 처리
+                    append_word()
                     self.tokens.append([word, self.classify_word(word)])
                     break
 
-            #키워드가 추출된 경우 이전에 추출된 식별자나 숫자를 처리, 고쳐야 할 것 워드 간에 적당히 끊어주는 기능
-            def append_word():
-                if self.word_tmp != '':
-                    self.word_type = self.classify_word(self.word_tmp)
-                    self.tokens.append([self.word_tmp, self.word_type])
-
             if self.found_keyword:
                 self.found_keyword = False
-                append_word()
-            #키워드가 추출되지 않았을 경우 식별자나 숫자를 추출
+            #키워드가 나타나지 않았을 경우
             else:
-                pass
+                if self.code[self.chr_pointer] in [' ', '\n']: #공백이나 개행이 나타났을 경우
+                    append_word()
+                elif self.code[self.chr_pointer] in self.character:
+                    if self.word_type == None:
+                        self.word_type = 'identifier'
+                    elif self.word_type == 'identifier':
+                        self.word_tmp += self.code[self.chr_pointer]
+                    elif self.word_type == 'number':
+                        pass
+                        #오류 내야지
+                elif self.code[self.chr_pointer] in self.number:
+                    if self.word_type == None:
+                        self.word_type = 'number'
+                    elif self.word_type == 'number':
+                        self.word_tmp += self.code[self.chr_pointer]
+                    elif self.word_type == 'identifier':
+                        pass
+                        #오류 내야지
+
+            self.chr_pointer += 1
 
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
