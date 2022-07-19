@@ -9,9 +9,9 @@ class octo_lang:
         else:
             return False
 
-    def match_keyword(self, word): #키워드인지 확인, returna처럼 일부만 키워드인 경우를 걸러내기 위한 메소드
+    def match_keyword(self, word): #키워드인지 확인, 알파벳으로 이루어졌을 경우 returna처럼 일부만 키워드인 경우를 걸러내기 위한 메소드
         if self.chr_pointer < (len(self.code) - len(word)) and self.match_word(word):
-            if self.code[self.chr_pointer + len(word)] not in (self.number + self.character):
+            if self.code[self.chr_pointer] not in self.character or self.code[self.chr_pointer + len(word)] not in (self.number + self.character):
                 return True
         return False
 
@@ -38,7 +38,7 @@ class octo_lang:
                 return 'bracket'
             elif word in ['and', 'or', 'not']:
                 return 'logical_operator'
-            elif word in ['+', '-', '*', '/', '%']:
+            elif word in ['+', '-', '*', '/', '%', '=']:
                 return 'operator'
             elif word in ['=!', '==', '<', '>', '<=', '>=']:
                 return 'compare_operator'
@@ -74,8 +74,6 @@ class octo_lang:
 
             #들여쓰기 처리
             if self.found_newline:
-                if self.code[self.chr_pointer] == ' ':
-                    print('!!!')
                 self.found_newline = False
                 space_tmp = 0
                 while self.match_word(' '):
@@ -90,6 +88,7 @@ class octo_lang:
                     self.word_type = self.classify_word(self.word_tmp)
                     self.tokens.append([self.word_tmp, self.word_type])
                     self.word_type = None
+                    self.word_tmp = ''
 
             #키워드 확인
             for word in self.keyword:
@@ -108,10 +107,11 @@ class octo_lang:
                 if self.code[self.chr_pointer] in [' ', '\n']: #공백이나 개행이 나타났을 경우
                     append_word()
                 elif self.code[self.chr_pointer] in self.character:
+                    self.word_tmp += self.code[self.chr_pointer]
                     if self.word_type == None:
                         self.word_type = 'identifier'
                     elif self.word_type == 'identifier':
-                        self.word_tmp += self.code[self.chr_pointer]
+                        pass
                     elif self.word_type == 'number':
                         pass
                         #오류 내야지

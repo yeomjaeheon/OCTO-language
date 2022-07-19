@@ -1,33 +1,14 @@
-//print 정의는 생략함(기본 기능을 이용해 octo 내부에서 구현할 예정)
-//return
-/*
+//주석 테스트
 
-def find_prime(n, result):
-	def is_prime(n):
-		def check(n, a):
-			if a > 1:
-				if n % a == 0:
-					return 0
-				else:
-					return check(n, a - 1)
-			else:
-				return 1
-				
-		if n > 1:
-			return check(n, n - 1)
-		else:
-			return 0
-*/
+def fibo(n):
+    def calcul(a, b, t, end, res):
+        if t < end:
+            return calcul(b, a + b, t + 1, end, res + [b])
+        else:
+            return res + [b]
+    
+    return calcul(0, 1, 1, n, [])
 
-	if n > 1:
-		if is_prime(n):
-			return find_prime(n - 1, result + [n])
-		else:
-			return find_prime(n - 1, result)
-	else:
-		return result
-		
 def main():
-	n = 100
-	prime_numbers = find_prime(n)
-	print(*prime_numbers)
+    n = 10
+    result = fibo(n)
