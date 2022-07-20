@@ -2,20 +2,9 @@ class octo_lang:
 
     def __init__(self, code): #lexing이 이루어짐
         self.code = code + ' ' #chr_pointer 가산에 예외처리를 하지 않기 위해 플레이스홀더로 스페이스 추가
-        self.keyword = ['def', 'main', ':', ',', 'return', 'if', 'else', 'elif', '(', ')', '[', ']', '==', '!=', '<=', '>=', '<', '>', '+', '-', '*', '/', '%', '=', 'and', 'or', 'not']
-        self.comments = {'//' : '\n', '/*' : '*/'}
-        self.number = [chr(i) for i in range(48, 58)]
-        self.character = [chr(i) for i in range(65, 91)] + [chr(i) for i in range(97, 123)] + ['_']
-        self.errors = []
-        #토큰화
-        def classify_word(word):
-            if word not in self.keyword:
-                if word[0] in self.number:
-                    return 'NUMBER'
-                elif word[0] in self.character:
-                    return 'NAME'
-            else:
-                classification = {
+        self.keyword = {
+                    'output_integer' : 'BF_OUTPUT', 
+                    'input_interger' : 'BF_INPUT', 
                     'def' : 'DEFINE', 
                     'return' : 'RETURN', 
                     'main' : 'FUNC_MAIN', 
@@ -44,8 +33,19 @@ class octo_lang:
                     'or' : 'OR', 
                     'not' : 'NOT'
                 }
-
-                return classification[word]
+        self.comments = {'//' : '\n', '/*' : '*/'}
+        self.number = [chr(i) for i in range(48, 58)]
+        self.character = [chr(i) for i in range(65, 91)] + [chr(i) for i in range(97, 123)] + ['_']
+        self.errors = []
+        #토큰화
+        def classify_word(word):
+            if word not in self.keyword:
+                if word[0] in self.number:
+                    return 'NUMBER'
+                elif word[0] in self.character:
+                    return 'NAME'
+            else:
+                return self.keyword[word]
 
 
         def match_word(word): #단순히 현재 글자 포인터 기준으로 특정 문자열이 나타나는지만을 확인
@@ -103,7 +103,7 @@ class octo_lang:
                     self.word_tmp = ''
 
             #키워드 확인
-            for word in self.keyword:
+            for word in self.keyword.keys():
                 if match_keyword(word):
                     self.chr_pointer += (len(word) - 1)
                     self.found_keyword = True
@@ -125,7 +125,9 @@ class octo_lang:
                     elif self.word_type == 'NAME':
                         pass
                     elif self.word_type == 'NUMBER':
-                        self.errors.append({'line' : line_tmp, 'index' : len(self.tokens), 'error' : '잘못된 식별자명 : '})
+                        pass
+                        #일단 오류 메세지 보류
+                        #self.errors.append({'line' : line_tmp, 'index' : len(self.tokens), 'error' : '잘못된 식별자명 : '})
                 elif self.code[self.chr_pointer] in self.number:
                     self.word_tmp += self.code[self.chr_pointer]
                     if self.word_type == None:
