@@ -1,10 +1,6 @@
-from ast import keyword
-from xmlrpc.client import FastParser
-
-
 class octo_lang:
 
-    def __init__(self, code):
+    def __init__(self, code): #lexing이 이루어짐
         self.code = code + ' ' #chr_pointer 가산에 예외처리를 하지 않기 위해 플레이스홀더로 스페이스 추가
         self.keyword = ['def', 'main', ':', ',', 'return', 'if', 'else', 'elif', '(', ')', '[', ']', '==', '!=', '<=', '>=', '<', '>', '+', '-', '*', '/', '%', '=', 'and', 'or', 'not']
         self.comments = {'//' : '\n', '/*' : '*/'}
@@ -15,32 +11,42 @@ class octo_lang:
         def classify_word(word):
             if word not in self.keyword:
                 if word[0] in self.number:
-                    return 'number'
+                    return 'NUMBER'
                 elif word[0] in self.character:
-                    return 'identifier'
+                    return 'NAME'
             else:
-                if word in ['if', 'else', 'elif']:
-                    return 'control_flow'
-                elif word in ['def']:
-                    return 'function_definition'
-                elif word in ['main']:
-                    return 'function_start'
-                elif word in ['return']:
-                    return 'return'
-                elif word in [':']:
-                    return 'colon'
-                elif word in ['(', ')']:
-                    return 'parenthesis'
-                elif word in ['[', ']']:
-                    return 'bracket'
-                elif word in ['and', 'or', 'not']:
-                    return 'logical_operator'
-                elif word in ['+', '-', '*', '/', '%', '=']:
-                    return 'operator'
-                elif word in ['=!', '==', '<', '>', '<=', '>=']:
-                    return 'compare_operator'
-                elif word in [',']:
-                    return 'comma'
+                classification = {
+                    'def' : 'DEFINE', 
+                    'return' : 'RETURN', 
+                    'main' : 'FUNC_MAIN', 
+                    ':' : 'COLON', 
+                    ',' : 'COMMA', 
+                    'if' : 'IF', 
+                    'else' : 'ELSE', 
+                    'elif' : 'ELIF', 
+                    '(' : 'L_PAREN', 
+                    ')' : 'R_PAREN', 
+                    '[' : 'L_BRACK', 
+                    ']' : 'R_BRACK', 
+                    '==' : 'EQUAL', 
+                    '!=' : 'NOT_EQUAL', 
+                    '<=' : 'LESS_EQUAL', 
+                    '>=' : 'GREATER_EQUAL', 
+                    '<' : 'LESS', 
+                    '>' : 'GREATER', 
+                    '+' : 'PLUS', 
+                    '-' : 'MINUS', 
+                    '*' : 'MULT', 
+                    '/' : 'DIV', 
+                    '%' : 'MOD', 
+                    '=' : 'IS', 
+                    'and' : 'AND', 
+                    'or' : 'OR', 
+                    'not' : 'NOT'
+                }
+
+                return classification[word]
+
 
         def match_word(word): #단순히 현재 글자 포인터 기준으로 특정 문자열이 나타나는지만을 확인
             if self.chr_pointer <= (len(self.code) - len(word)) and self.code[self.chr_pointer : self.chr_pointer + len(word)] == word:
@@ -85,7 +91,7 @@ class octo_lang:
                 while match_word(' '):
                     space_tmp += 1
                     self.chr_pointer += 1
-                self.tokens.append([space_tmp, 'indent'])
+                self.tokens.append([space_tmp, 'INDENT'])
             if self.code[self.chr_pointer] == '\n':
                 self.found_newline = True
             #워드 처리를 위한 내부 함수
@@ -115,19 +121,19 @@ class octo_lang:
                 elif self.code[self.chr_pointer] in self.character:
                     self.word_tmp += self.code[self.chr_pointer]
                     if self.word_type == None:
-                        self.word_type = 'identifier'
-                    elif self.word_type == 'identifier':
+                        self.word_type = 'NAME'
+                    elif self.word_type == 'NAME':
                         pass
-                    elif self.word_type == 'number':
+                    elif self.word_type == 'NUMBER':
                         self.errors.append({'line' : line_tmp, 'index' : len(self.tokens), 'error' : '잘못된 식별자명 : '})
                 elif self.code[self.chr_pointer] in self.number:
                     self.word_tmp += self.code[self.chr_pointer]
                     if self.word_type == None:
-                        self.word_type = 'number'
+                        self.word_type = 'NUMBER'
 
             self.chr_pointer += 1
 
-    def build_ast(self):
+    def parse(self):
         pass
 
     def notice_errors(self):
