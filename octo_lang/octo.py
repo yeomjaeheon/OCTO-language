@@ -101,7 +101,7 @@ class octo_lang:
                         try:
                             self.word_tmp = int(self.word_tmp)
                         except:
-                            self.report_error(line_tmp, '오류 : ', len(self.tokens))
+                            self.report_error(line_tmp, '오류 : ', self.word_tmp)
                             self.notice_errors()
                             sys.exit()
                     self.tokens.append([self.word_type, self.word_tmp])
@@ -132,8 +132,6 @@ class octo_lang:
                         pass
                     elif self.word_type == 'NUMBER':
                         pass
-                        #일단 오류 메세지 보류
-                        #self.errors.append({'line' : line_tmp, 'index' : len(self.tokens), 'error' : '잘못된 식별자명 : '})
                 elif self.code[self.chr_pointer] in self.number:
                     self.word_tmp += self.code[self.chr_pointer]
                     if self.word_type == None:
@@ -154,7 +152,7 @@ class octo_lang:
 
     def notice_errors(self):
         for e in self.errors:
-            print('{0}번째 줄> {1}{2}'.format(e['line'], e['error'], self.tokens[e['index']][0]))
+            print('{0}번째 줄> {1}{2}'.format(e['line'], e['error'], e['index']))
 
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
