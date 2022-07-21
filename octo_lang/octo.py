@@ -1,3 +1,5 @@
+import sys
+
 class octo_lang:
 
     def __init__(self, code): #lexing이 이루어짐
@@ -10,9 +12,6 @@ class octo_lang:
                     'main' : 'FUNC_MAIN', 
                     ':' : 'COLON', 
                     ',' : 'COMMA', 
-                    'if' : 'IF', 
-                    'else' : 'ELSE', 
-                    'elif' : 'ELIF', 
                     '(' : 'L_PAREN', 
                     ')' : 'R_PAREN', 
                     '[' : 'L_BRACK', 
@@ -91,14 +90,21 @@ class octo_lang:
                 while match_word(' '):
                     space_tmp += 1
                     self.chr_pointer += 1
-                self.tokens.append([space_tmp, 'INDENT'])
+                self.tokens.append(['INDENT', space_tmp])
             if self.code[self.chr_pointer] == '\n':
                 self.found_newline = True
             #워드 처리를 위한 내부 함수
             def append_word():
                 if self.word_tmp != '':
                     self.word_type = classify_word(self.word_tmp)
-                    self.tokens.append([self.word_tmp, self.word_type])
+                    if self.word_type == 'NUMBER':
+                        try:
+                            self.word_tmp = int(self.word_tmp)
+                        except:
+                            self.report_error(line_tmp, '오류 : ', len(self.tokens))
+                            self.notice_errors()
+                            sys.exit()
+                    self.tokens.append([self.word_type, self.word_tmp])
                     self.word_type = None
                     self.word_tmp = ''
 
@@ -109,7 +115,7 @@ class octo_lang:
                     self.found_keyword = True
                     #키워드가 추출된 경우 이전에 추출된 식별자나 숫자를 처리
                     append_word()
-                    self.tokens.append([word, classify_word(word)])
+                    self.tokens.append([classify_word(word)])
                     break
 
             if self.found_keyword:
@@ -135,8 +141,16 @@ class octo_lang:
 
             self.chr_pointer += 1
 
-    def parse(self):
-        pass
+    def parse(self): #토큰에서 index 0 = 텍스트, 1 = 정보임
+        self.ast = []
+        token_pointer = 0
+        while token_pointer < len(self.tokens):
+            if self.tokens[token_pointer][0] == 'DEFINE':
+                pass
+            token_pointer += 1
+
+    def report_error(self, line_num, error_message, token_index):
+        self.errors.append({'line' : line_num, 'index' : token_index, 'error' : error_message})
 
     def notice_errors(self):
         for e in self.errors:
