@@ -37,15 +37,6 @@ class octo_lang:
         self.character = [chr(i) for i in range(65, 91)] + [chr(i) for i in range(97, 123)] + ['_']
         self.errors = []
         #토큰화
-        def classify_word(word):
-            if word not in self.keyword:
-                if word[0] in self.number:
-                    return 'NUMBER'
-                elif word[0] in self.character:
-                    return 'NAME'
-            else:
-                return self.keyword[word]
-
 
         def match_word(word): #단순히 현재 글자 포인터 기준으로 특정 문자열이 나타나는지만을 확인
             if self.chr_pointer <= (len(self.code) - len(word)) and self.code[self.chr_pointer : self.chr_pointer + len(word)] == word:
@@ -96,14 +87,14 @@ class octo_lang:
             #워드 처리를 위한 내부 함수
             def append_word():
                 if self.word_tmp != '':
-                    self.word_type = classify_word(self.word_tmp)
-                    if self.word_type == 'NUMBER':
+                    #self.word_type = classify_word(self.word_tmp)
+                    if self.word_type == 'INTEGER':
                         try:
                             self.word_tmp = int(self.word_tmp)
                         except:
-                            self.report_error(line_tmp, '오류 : ', self.word_tmp)
-                            self.notice_errors()
-                            sys.exit()
+                            self.report_error(line_tmp, 'WEIRD_INTEGER', self.word_tmp)
+                    elif self.word_type == 'WEIRD_NAME':
+                        self.report_error(line_tmp, self.word_type, self.word_tmp)
                     self.tokens.append([self.word_type, self.word_tmp])
                     self.word_type = None
                     self.word_tmp = ''
@@ -115,7 +106,7 @@ class octo_lang:
                     self.found_keyword = True
                     #키워드가 추출된 경우 이전에 추출된 식별자나 숫자를 처리
                     append_word()
-                    self.tokens.append([classify_word(word)])
+                    self.tokens.append([self.keyword[word]])
                     break
 
             if self.found_keyword:
@@ -130,12 +121,15 @@ class octo_lang:
                         self.word_type = 'NAME'
                     elif self.word_type == 'NAME':
                         pass
-                    elif self.word_type == 'NUMBER':
+                    elif self.word_type == 'INTEGER':
                         pass
                 elif self.code[self.chr_pointer] in self.number:
                     self.word_tmp += self.code[self.chr_pointer]
                     if self.word_type == None:
-                        self.word_type = 'NUMBER'
+                        self.word_type = 'INTEGER'
+                else:
+                    self.word_tmp += self.code[self.chr_pointer]
+                    self.word_type = 'WEIRD_NAME'
 
             self.chr_pointer += 1
 
