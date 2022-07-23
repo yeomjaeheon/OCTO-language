@@ -1,3 +1,4 @@
+from inspect import Parameter
 import sys
 
 class octo_lang:
@@ -5,11 +6,11 @@ class octo_lang:
     def __init__(self, code): #lexing이 이루어짐
         self.code = code + ' ' #chr_pointer 가산에 예외처리를 하지 않기 위해 플레이스홀더로 스페이스 추가
         self.keyword = {
-                    'output_integer' : 'BF_OUTPUT', 
-                    'input_interger' : 'BF_INPUT', 
+                    'output_integer' : 'NAME', #아스키 출력을 위한 빌트인 함수
+                    'input_interger' : 'NAME', #아스키 입력을 위한 빌트인 함수
                     'def' : 'DEFINE', 
                     'return' : 'RETURN', 
-                    'main' : 'FUNC_MAIN', 
+                    'main' : 'NAME', #특수 함수, 없으면 오류
                     ':' : 'COLON', 
                     ',' : 'COMMA', 
                     '(' : 'L_PAREN', 
@@ -32,6 +33,7 @@ class octo_lang:
                     'or' : 'OR', 
                     'not' : 'NOT'
                 }
+        self.built_in_functions = ['output_integer', 'input_interger']
         self.comments = {'//' : '\n', '/*' : '*/'}
         self.number = [chr(i) for i in range(48, 58)]
         self.character = [chr(i) for i in range(65, 91)] + [chr(i) for i in range(97, 123)] + ['_']
@@ -92,8 +94,12 @@ class octo_lang:
                         try:
                             self.word_tmp = int(self.word_tmp)
                         except:
-                            pass
-                    self.tokens.append([self.word_type, self.word_tmp])
+                            print('{0}번째 줄> 오류 : 잘못된 정수 {1}'.format(line_tmp, self.word_tmp))
+                            sys.exit()
+                    if self.word_type == 'WEIRD_NAME':
+                        print('{0}번째 줄> 오류 : 잘못된 이름 {1}'.format(line_tmp, self.word_tmp))
+                        sys.exit()
+                    self.tokens.append([self.word_type, self.word_tmp, line_tmp])
                     self.word_type = None
                     self.word_tmp = ''
 
@@ -104,7 +110,7 @@ class octo_lang:
                     self.found_keyword = True
                     #키워드가 추출된 경우 이전에 추출된 식별자나 숫자를 처리
                     append_word()
-                    self.tokens.append([self.keyword[word], word])
+                    self.tokens.append([self.keyword[word], word, line_tmp])
                     break
 
             if self.found_keyword:
@@ -130,40 +136,121 @@ class octo_lang:
                     self.word_type = 'WEIRD_NAME'
 
             self.chr_pointer += 1
+        self.tokens.append(['END', 'END'])
 
-    def parse(self): #토큰에서 index 0 = 텍스트, 1 = 정보
-        line_tmp = 0
-        def match_token(index, token):
-            if len(self.tokens) > index and self.tokens[index][0] == token:
-                return True
+    def parse(self):
+        #현재 라인 수는 각 토큰의 index 2에 있음
+        self.indent_tmp = 0 #현재 들여쓰기 칸 수
+        self.indent_data = [] #들여쓰기 칸 수 기록
+        self.in_block = False
+        self.func_name_tmp = ''
+        self.token_pointer = 0
+        self.parse_tree = {}
+        for b in self.built_in_functions:
+            self.parse_tree[b] = {'parameters' : ['n'], 'block' : [], 'nest_functions' : [], 'variables' : ['n']}
+
+        def get_token():
+            self.token_pointer += 1
+            return self.tokens[self.token_pointer - 1]
+
+        def process_function(): #내부 함수용 처리는 따로 만들어야 함, 내부 함수는 1단계까지만 허용
+            if self.token[0] == 'NAME':
+                if self.token[1] not in self.parse_tree.keys():
+                    self.parse_tree[self.token[1]] = {'parameters' : [], 'block' : [], 'nest_functions' : [], 'variables' : []}
+                    self.func_name_tmp = self.token[1]
+                    self.token = get_token()
+                    if self.token[0] == 'L_PAREN':
+                        self.token = get_token()
+                        process_function_parameter() #닫는 소괄호를 찾을 때까지
+                        self.token = get_token()
+                        if self.token[0] == 'COLON':
+                            self.token = get_token()
+                            if self.token[0] == 'INDENT':
+                                if self.token[1] > self.indent_tmp:
+                                    self.indent_tmp = self.token[1]
+                                    self.indent_data.append(self.token[1])
+                                    self.in_block = True
+                                    self.token = get_token()
+                                    process_function_block()
+                                    #함수 파싱 마치는 처리 필요
+                                else:
+                                    print('{0}번째 줄> 오류 : 들여쓰기'.format(self.token[2]))
+                                    sys.exit()
+                            elif self.token[0] == 'END':
+                                print('{0}번째 줄> 오류 : 완전하게 정의되지 않은 함수 {1}'.format(self.token[2], self.func_name_tmp))
+                                sys.exit()
+                            else:
+                                print('{0}번째 줄> 오류 : {1}'.format(self.token[2], self.token[1]))
+                                sys.exit()
+                        else:
+                            print('{0}번째 줄> 오류 : 세미콜론이 없음'.format(self.token[2]))
+                            sys.exit()
+                    else:
+                        print('{0}번째 줄> 오류 : 여는 소괄호가 없음'.format(self.token[2]))
+                        sys.exit()
+                else:
+                    print('{0}번째 줄> 오류 : 중복 정의된 함수 {1}'.format(self.token[2], self.token[1]))
+                    sys.exit()
             else:
-                return False
+                print('{0}번째 줄> 오류 : 함수명을 찾을 수 없음'.format(self.token[2]))
+                sys.exit()
 
-        def notice_error(line, reason, word):
-            print('{0}번째 줄> {1} : {2}'.format(line, reason, word))
-            sys.exit()
 
-        self.ast = []
-        token_pointer = 0
-        while token_pointer < len(self.tokens):
-            if match_token(token_pointer, 'DEFINE'):
-                if match_token(token_pointer + 1, 'NAME'):
+        def process_function_parameter():
+            while self.token[0] != 'R_PAREN':
+                if self.token[0] == 'NAME':
+                    if self.token[1] not in self.parse_tree[self.func_name_tmp]['parameters']:
+                        self.parse_tree[self.func_name_tmp]['parameters'].append({'name' : self.token[1], 'type' : 'unknown'})
+                        self.parse_tree[self.func_name_tmp]['variables'].append({'name' : self.token[1], 'type' : 'unknown'})
+                    else:
+                        print('{0}번째 줄> 오류 : 중복된 매개변수 {1}'.format(self.token[2], self.token[1]))
+                        sys.exit()
+                elif self.token[0] in ['INDENT', 'END', 'COLON']:
+                    print('{0}번째 줄> 오류 : 소괄호가 닫히지 않음'.format(self.token[2]))
+                    sys.exit()
+                else:
+                    print('{0}번째 줄> 오류 : {1}'.format(self.token[2], self.token[1]))
+                    sys.exit()
+                self.token = get_token()
+                if self.token[0] == 'COMMA':
+                    self.token = get_token()
+                elif self.token[0] == 'R_PAREN':
                     pass
-                elif match_token(token_pointer + 1, 'FUNC_MAIN'):
-                    pass
-                elif match_token(token_pointer + 1, 'WEIRD_NAME'): #오류
-                    notice_error(line_tmp, '잘못된 함수명', self.tokens[token_pointer + 1][1])
-                else: #오류
-                    notice_error(line_tmp, '오류', self.tokens[token_pointer + 1][1])
-            if match_token(token_pointer, 'INDENT'):
-                line_tmp += 1
+                elif self.token[0] in ['INDENT', 'END', 'COLON']:
+                    print('{0}번째 줄> 오류 : 소괄호가 닫히지 않음'.format(self.token[2]))
+                    sys.exit()
+                else:
+                    print('{0}번째 줄> 오류 : {1}'.format(self.token[2], self.token[1]))
+                    sys.exit()
 
-            token_pointer += 1
+        def process_function_block(): #이제 이거 구현하면 됨
+            pass
+
+        def process_expression():
+            pass
+
+        def process_call():
+            pass
+
+        while True: #내수함수가 바깥 함수와 이름이 겹치는 일이 없어야 함 내부 변수, 매개변수도 마찬가지로 함수들과 이름 겹치지 않아야 함
+            self.token = get_token()
+            if self.token[0] == 'DEFINE':
+                self.token = get_token()
+                process_function()
+            elif self.token[0] == 'INDENT':
+                self.indent_tmp = self.token[1]
+                self.indent_data.append(self.token[1])
+            elif self.token[0] == 'END':
+                break
+            else:
+                print('{0}번째 줄> 오류 : {1}'.format(self.token[2], self.token[1]))
+                sys.exit()
+            print(self.parse_tree)
 
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
     print(code)
 
 program = octo_lang(code)
-program.parse()
 print(program.tokens)
+program.parse()
