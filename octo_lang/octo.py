@@ -92,9 +92,7 @@ class octo_lang:
                         try:
                             self.word_tmp = int(self.word_tmp)
                         except:
-                            self.report_error(line_tmp, 'WEIRD_INTEGER', self.word_tmp)
-                    elif self.word_type == 'WEIRD_NAME':
-                        self.report_error(line_tmp, self.word_type, self.word_tmp)
+                            pass
                     self.tokens.append([self.word_type, self.word_tmp])
                     self.word_type = None
                     self.word_tmp = ''
@@ -106,7 +104,7 @@ class octo_lang:
                     self.found_keyword = True
                     #키워드가 추출된 경우 이전에 추출된 식별자나 숫자를 처리
                     append_word()
-                    self.tokens.append([self.keyword[word]])
+                    self.tokens.append([self.keyword[word], word])
                     break
 
             if self.found_keyword:
@@ -133,25 +131,39 @@ class octo_lang:
 
             self.chr_pointer += 1
 
-    def parse(self): #토큰에서 index 0 = 텍스트, 1 = 정보임
+    def parse(self): #토큰에서 index 0 = 텍스트, 1 = 정보
+        line_tmp = 0
+        def match_token(index, token):
+            if len(self.tokens) > index and self.tokens[index][0] == token:
+                return True
+            else:
+                return False
+
+        def notice_error(line, reason, word):
+            print('{0}번째 줄> {1} : {2}'.format(line, reason, word))
+            sys.exit()
+
         self.ast = []
         token_pointer = 0
         while token_pointer < len(self.tokens):
-            if self.tokens[token_pointer][0] == 'DEFINE':
-                pass
+            if match_token(token_pointer, 'DEFINE'):
+                if match_token(token_pointer + 1, 'NAME'):
+                    pass
+                elif match_token(token_pointer + 1, 'FUNC_MAIN'):
+                    pass
+                elif match_token(token_pointer + 1, 'WEIRD_NAME'): #오류
+                    notice_error(line_tmp, '잘못된 함수명', self.tokens[token_pointer + 1][1])
+                else: #오류
+                    notice_error(line_tmp, '오류', self.tokens[token_pointer + 1][1])
+            if match_token(token_pointer, 'INDENT'):
+                line_tmp += 1
+
             token_pointer += 1
-
-    def report_error(self, line_num, error_message, token_index):
-        self.errors.append({'line' : line_num, 'index' : token_index, 'error' : error_message})
-
-    def notice_errors(self):
-        for e in self.errors:
-            print('{0}번째 줄> {1}{2}'.format(e['line'], e['error'], e['index']))
 
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
     print(code)
-    program = octo_lang(code)
 
+program = octo_lang(code)
+program.parse()
 print(program.tokens)
-program.notice_errors()
