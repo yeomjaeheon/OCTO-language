@@ -8,7 +8,7 @@
 def fibo(n):
     def if(condition, true_function, false_function):
         return [true_function, false_function][condition]
-        
+
     def final(a, b, t, end, res):
         return res
 
