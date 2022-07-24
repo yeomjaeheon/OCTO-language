@@ -1,9 +1,8 @@
 //주석 테스트
-
-def if(condition, true_function, false_function):
+def fibo(n):
+    def if(condition, true_function, false_function):
     return [true_function, false_function][condition]
 
-def fibo(n):
     def final(a, b, t, end, res):
         return res
 
