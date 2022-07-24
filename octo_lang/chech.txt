@@ -1,0 +1,10 @@
+{'output_integer': {'parameters': 1, 'block': [], 'nested_functions': {}, 'variables': {'n': {'type': 'INTEGER', 'value': None}}}, 
+
+'input_interger': {'parameters': 1, 'block': [], 'nested_functions': {}, 'variables': {'n': {'type': 'INTEGER', 'value': None}}}, 
+
+'fibo': {'parameters': 1, 'block': [], 
+    'nested_functions': 
+        {'if': {'parameters': 3, 'block': [], 'nested_functions': {}, 'variables': {'condition': {'type': 'unknown', 'value': None}, 'true_function': {'type': 'unknown', 'value': None}, 'false_function': {'type': 'unknown', 'value': None}}}, 
+        'final': {'parameters': 5, 'block': [], 'nested_functions': {}, 'variables': {'a': {'type': 'unknown', 'value': None}, 'b': {'type': 'unknown', 'value': None}, 't': {'type': 'unknown', 'value': None}, 'end': {'type': 'unknown', 'value': None}, 'res': {'type': 'unknown', 'value': None}}}, 
+        'calcul': {'parameters': 5, 'block': [], 'nested_functions': {}, 'variables': {'a': {'type': 'unknown', 'value': None}, 'b': {'type': 'unknown', 'value': None}, 't': {'type': 'unknown', 'value': None}, 'end': {'type': 'unknown', 'value': None}, 'res': {'type': 'unknown', 'value': None}}}}, 
+        'variables': {'n': {'type': 'unknown', 'value': None}}}}

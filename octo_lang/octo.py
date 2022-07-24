@@ -150,7 +150,6 @@ class octo_lang:
         self.parent_data.append(self.parse_tree)
         self.parent_name_data.append('')
 
-        self.in_block = False
         self.token_pointer = 0
         for b in self.built_in_functions:
             self.parse_tree[b] = {'parameters' : 1, 'block' : [], 'nested_functions' : {}, 'variables' : {'n' : {'type' : 'INTEGER', 'value' : None}}}
@@ -178,26 +177,8 @@ class octo_lang:
                         self.token = get_token()
                         if self.token[0] == 'COLON':
                             self.token = get_token()
-                            self.in_block = True
                             process_function_block()
                             #함수 파싱 마치는 처리 필요
-                            '''
-                            if self.token[0] == 'INDENT': #아마 이 부분도 블럭에서 알아서 처리 하게 해야될 듯
-                                print(self.token[1])
-                                if self.token[1] > self.indent_data[-1]:
-                                    self.indent_data.append(self.token[1])
-                                    self.in_block = True
-                                    self.token = get_token()
-                                    process_function_block()
-                                    #함수 파싱 마치는 처리 필요
-                                    sys.exit()
-                            elif self.token[0] == 'END':
-                                print('{0}번째 줄> 오류 : 완전하게 정의되지 않은 함수 {1}'.format(self.token[2], self.parent_name_data[-1]))
-                                sys.exit()
-                            else:
-                                print('{0}번째 줄> 오류 : {1}'.format(self.token[2], self.token[1]))
-                                sys.exit()
-                            '''
                         else:
                             print('{0}번째 줄> 오류 : 세미콜론이 없음'.format(self.token[2]))
                             sys.exit()
@@ -211,6 +192,9 @@ class octo_lang:
                 print('{0}번째 줄> 오류 : 함수명을 찾을 수 없음'.format(self.token[2]))
                 sys.exit()
             print('{0} : completed'.format(self.parent_name_data[-1]))
+            self.parent_data.pop()
+            self.parent_name_data.pop()
+            self.indent_data.pop()
 
         def process_function_parameter():
             while self.token[0] != 'R_PAREN':
@@ -249,7 +233,6 @@ class octo_lang:
                         self.token = get_token()
                         continue
                     elif self.token[1] == self.indent_data[-1]: #정상적인 명령어들이 이어지는 경우
-                        self.indent_data.append(self.token[1])
                         self.token = get_token()
                         continue
                     else:
@@ -267,15 +250,18 @@ class octo_lang:
                         elif self.token[0] == 'DEFINE': #같은 단계의 함수
                             break
                         else:
-                            print('{0}번째 줄> 오류 : 들여쓰기'.format(self.token[2]))
-                            sys.exit()
+                            self.indent_data.pop()
+                            continue
+                            #print('{0}번째 줄> 오류 : 들여쓰기'.format(self.token[2]))
+                            #sys.exit()
                 elif self.token[0] == 'DEFINE':
                     indent_tmp = self.indent_data.pop()
+                    print('popp3d')
                     if indent_tmp > self.indent_data[-1]:
-                        self.token = get_token()
                         self.indent_data.append(indent_tmp)
+                        self.token = get_token()
                         process_function(nested = True)
-                        self.indent_data.pop()
+                        continue
                     else:
                         break
                     #함수 인식 후처리
@@ -284,8 +270,14 @@ class octo_lang:
                     self.token = get_token()
                     process_return()
                     #리턴 후 처리
-                elif self.token[0] == 'NAME':
+                elif self.token[0] == 'NAME': #이거 만들면 사실상 파서는 거의 완성
                     pass
+                elif self.token[0] == 'END':
+                    if self.parent_data[-1][self.parent_name_data[-1]]['block'] == [] and self.parent_data[-1][self.parent_name_data[-1]]['nested_functions'] == {}:
+                        print('{0}번째 줄> 오류 : 완전하게 정의되지 않은 함수 {1}'.format(self.token[2], self.parent_name_data[-1]))
+                        sys.exit()
+                    else:
+                        break
                 self.token = get_token()
 
         def process_expression():
@@ -302,15 +294,13 @@ class octo_lang:
         내부 함수는 바깥 함수의 변수에 함부로 접근할 수 없음(매개변수로 입력 받아야만 함)
         기본 함수의 경우 내부 함수와 다른 함수의 이름이 같다면 내부 함수를 호출
         '''
+        self.token = get_token()
 
         while True:
             print(self.parse_tree)
-            self.token = get_token()
             if self.token[0] == 'DEFINE':
                 self.token = get_token()
                 process_function()
-                self.parent_data.pop()
-                self.parent_name_data.pop()
                 #indent 관련한 처리
             elif self.token[0] == 'INDENT':
                 self.indent_data.append(self.token[1])
@@ -319,6 +309,7 @@ class octo_lang:
             else:
                 print('{0}번째 줄> 오3류 : {1}'.format(self.token[2], self.token[1]))
                 sys.exit()
+            self.token = get_token()
 
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
