@@ -210,7 +210,7 @@ class octo_lang:
             else:
                 print('{0}번째 줄> 오류 : 함수명을 찾을 수 없음'.format(self.token[2]))
                 sys.exit()
-            print('{0} : colpleted'.format(self.parent_name_data[1]))
+            print('{0} : colpleted'.format(self.parent_name_data[-1]))
 
         def process_function_parameter():
             while self.token[0] != 'R_PAREN':
@@ -239,21 +239,24 @@ class octo_lang:
                     print('{0}번째 줄> 오류 : {1}'.format(self.token[2], self.token[1]))
                     sys.exit()
 
-        def process_function_block(): #이제 이거 구현하면 됨, 어떤 경우 내부 함수가 되는지 확인, 문제점 : 함수가 끝을 못냄(if 함수)
+        def process_function_block(): #이제 이거 구현하면 됨, 어떤 경우 내부 함수가 되는지 확인, 문제점 : 함수가 시작을 못함(final 함수)
             while True:
                 print(self.indent_data)
-                #print(self.parse_tree)
+                print(self.parse_tree)
                 if self.token[0] == 'INDENT':
-                    self.indent_data.append(self.token[1]) #pop을 적당히 써서 오류 없애기
                     if self.token[1] > self.indent_data[-1]:
+                        self.indent_data.append(self.token[1])
                         self.token = get_token()
                         continue
                     elif self.token[1] == self.indent_data[-1]: #정상적인 명령어들이 이어지는 경우
+                        self.indent_data.append(self.token[1])
                         self.token = get_token()
                         continue
                     else:
+                        self.indent_data.append(self.token[1])
                         self.token = get_token()
                         if self.token[0] == 'INDENT':
+                            print('poped')
                             self.indent_data.pop()
                             continue
                         elif self.token[0] == 'END':
@@ -266,8 +269,11 @@ class octo_lang:
                             sys.exit()
                 elif self.token[0] == 'DEFINE':
                     self.token = get_token()
-                    if self.indent_data.pop() > self.indent_data[-1]:
+                    indent_tmp = self.indent_data.pop()
+                    if indent_tmp > self.indent_data[-1]:
+                        self.indent_data.append(indent_tmp)
                         process_function(nested = True)
+                        self.indent_data.pop()
                     else:
                         break
                     #함수 인식 후처리
