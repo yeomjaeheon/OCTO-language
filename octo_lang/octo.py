@@ -1,5 +1,6 @@
 from inspect import Parameter
 import sys
+from textwrap import indent
 
 class octo_lang:
 
@@ -65,10 +66,11 @@ class octo_lang:
             for com in self.comments.keys():
                 if match_word(com):
                     while not match_word(self.comments[com]):
+                        if self.code[self.chr_pointer] == '\n': #개행 수 세기
+                            self.line_tmp += 1
                         self.chr_pointer += 1
-                    if self.comments[com] == '\n': #개행 수 세기
-                        self.line_tmp += 1
-                    self.chr_pointer += len(self.comments[com])
+                    if self.comments[com] == '*/':
+                        self.chr_pointer += len(self.comments[com])
                     recheck = True
                     break
             #주석 처리가 일어났다면 while 루프 처음으로 복귀
@@ -175,15 +177,18 @@ class octo_lang:
                         self.token = get_token()
                         if self.token[0] == 'COLON':
                             self.token = get_token()
+                            self.in_block = True
+                            process_function_block()
+                            #함수 파싱 마치는 처리 필요
+                            '''
                             if self.token[0] == 'INDENT': #아마 이 부분도 블럭에서 알아서 처리 하게 해야될 듯
+                                print(self.token[1])
                                 if self.token[1] > self.indent_data[-1]:
                                     self.indent_data.append(self.token[1])
                                     self.in_block = True
                                     self.token = get_token()
                                     process_function_block()
                                     #함수 파싱 마치는 처리 필요
-                                else:
-                                    print('{0}번째 줄> 오류 : 들여쓰기'.format(self.token[2]))
                                     sys.exit()
                             elif self.token[0] == 'END':
                                 print('{0}번째 줄> 오류 : 완전하게 정의되지 않은 함수 {1}'.format(self.token[2], self.parent_name_data[-1]))
@@ -191,6 +196,7 @@ class octo_lang:
                             else:
                                 print('{0}번째 줄> 오류 : {1}'.format(self.token[2], self.token[1]))
                                 sys.exit()
+                            '''
                         else:
                             print('{0}번째 줄> 오류 : 세미콜론이 없음'.format(self.token[2]))
                             sys.exit()
@@ -233,6 +239,8 @@ class octo_lang:
 
         def process_function_block(): #이제 이거 구현하면 됨
             while True:
+                if self.token[0] == 'INDENT':
+                    print('P')
                 if self.token[0] == 'DEFINE':
                     self.token = get_token()
                     process_function(nested = True)

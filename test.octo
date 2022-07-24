@@ -1,15 +1,21 @@
-//주석 테스트
+/*
+주석 테스트
+
+
+
+
+*/
 def fibo(n):
     def if(condition, true_function, false_function):
-    return [true_function, false_function][condition]
-
+        return [true_function, false_function][condition]
+        
     def final(a, b, t, end, res):
         return res
 
     def calcul(a, b, t, end, res):
         ret = if(t < end, calcul, final)
         return ret(b, a + b, t + 1, end, res + [b])
-    
+
     return calcul(0, 1, 1, n, [])
 
 def main():
