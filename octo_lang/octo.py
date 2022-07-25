@@ -226,7 +226,6 @@ class octo_lang:
         def process_function_block(): #이제 이거 구현하면 됨, 어떤 경우 내부 함수가 되는지 확인, 문제점 : 함수가 시작을 못함(final 함수)
             while True:
                 print(self.indent_data)
-                #print(self.parse_tree)
                 if self.token[0] == 'INDENT':
                     if self.token[1] > self.indent_data[-1]:
                         self.indent_data.append(self.token[1])
@@ -297,7 +296,7 @@ class octo_lang:
         self.token = get_token()
 
         while True:
-            print(self.parse_tree)
+            check_structure(self.parse_tree, 1)
             if self.token[0] == 'DEFINE':
                 self.token = get_token()
                 process_function()
@@ -311,6 +310,18 @@ class octo_lang:
                 sys.exit()
             self.token = get_token()
 
+def check_structure(parse_tree, n):
+    if n > 1:
+        for k in parse_tree.keys():
+            print('{0}ㄴ{1}'.format(' ' * n, k))
+            if len(parse_tree[k]['nested_functions']) > 0:
+                check_structure(parse_tree[k]['nested_functions'], n + 1)
+    elif n == 1:
+        for k in parse_tree.keys():
+            print(k)
+            check_structure(parse_tree[k]['nested_functions'], n + 1)
+
+
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
     print(code)
@@ -318,4 +329,3 @@ with open('test.octo', 'r', encoding = 'utf-8') as f:
 program = octo_lang(code)
 print(program.tokens)
 program.parse()
-print(program.parse_tree)
