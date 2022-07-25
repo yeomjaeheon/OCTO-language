@@ -85,6 +85,8 @@ class octo_lang:
                 while match_word(' '):
                     space_tmp += 1
                     self.chr_pointer += 1
+                if len(self.tokens) > 0 and self.tokens[-1][0] == 'INDENT':
+                    self.tokens.pop()
                 self.tokens.append(['INDENT', space_tmp, self.line_tmp])
             if self.code[self.chr_pointer] == '\n':
                 self.found_newline = True
@@ -248,7 +250,7 @@ class octo_lang:
                             sys.exit()
                         elif self.token[0] == 'DEFINE': #같은 단계의 함수
                             break
-                        else:
+                        else: #main이 인식이 안 되게 만드는 부분이 이 부분 + 궁극적인 원인은 indent data 관리 실패, 코드를 찬찬히 읽어보기
                             self.indent_data.pop()
                             continue
                             #print('{0}번째 줄> 오류 : 들여쓰기'.format(self.token[2]))
@@ -297,6 +299,7 @@ class octo_lang:
         indent에 따라 여러 가지 문법 오류로 main 함수를 컷해버리는 문제점이 있음, indent 관련된 코드 다 다시 읽을 것, 최악의 경우 parse method 자체를
         다시 짜 볼것
         lexer 단계에서 명령어 실행이나 함수 정의와 관계없는 indent token을 최대한 배제하는 방법을 강구해 볼것
+        -> 중복된 indent는 lexer 단계에서 삭제
         '''
         self.token = get_token()
 
@@ -333,4 +336,4 @@ with open('test.octo', 'r', encoding = 'utf-8') as f:
 
 program = octo_lang(code)
 print(program.tokens)
-program.parse()
+#program.parse()
