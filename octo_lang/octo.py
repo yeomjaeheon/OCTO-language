@@ -223,7 +223,7 @@ class octo_lang:
                     print('{0}번째 줄> 오2류 : {1}'.format(self.token[2], self.token[1]))
                     sys.exit()
 
-        def process_function_block(): #이제 이거 구현하면 됨, 어떤 경우 내부 함수가 되는지 확인, 문제점 : 함수가 시작을 못함(final 함수)
+        def process_function_block(): #이제 이거 구현하면 됨, indent 관련해서 문제가 있는 듯
             while True:
                 print(self.indent_data)
                 if self.token[0] == 'INDENT':
@@ -292,6 +292,11 @@ class octo_lang:
         이름 중복 관련 대응 방안 : 
         내부 함수는 바깥 함수의 변수에 함부로 접근할 수 없음(매개변수로 입력 받아야만 함)
         기본 함수의 경우 내부 함수와 다른 함수의 이름이 같다면 내부 함수를 호출
+
+        오류 : 
+        indent에 따라 여러 가지 문법 오류로 main 함수를 컷해버리는 문제점이 있음, indent 관련된 코드 다 다시 읽을 것, 최악의 경우 parse method 자체를
+        다시 짜 볼것
+        lexer 단계에서 명령어 실행이나 함수 정의와 관계없는 indent token을 최대한 배제하는 방법을 강구해 볼것
         '''
         self.token = get_token()
 

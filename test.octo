@@ -5,7 +5,14 @@
 
 
 */
+
+
+
 def fibo(n):
+
+
+
+
     def if(condition, true_function, false_function):
         return [true_function, false_function][condition]
 
@@ -14,6 +21,9 @@ def fibo(n):
         
     def final(a, b, t, end, res):
         return res
+
+
+
     def calcul(a, b, t, end, res):
         ret = if(t < end, calcul, final)
         return ret(b, a + b, t + 1, end, res + [b])
