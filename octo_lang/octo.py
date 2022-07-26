@@ -1,6 +1,6 @@
 import sys
 
-class octo_lang: #lexer에 주석처리가 제대로 안되는 오류 발견
+class octo_lang:
 
     def __init__(self, code): #lexing이 이루어짐
         self.code = code + ' ' #chr_pointer 가산에 예외처리를 하지 않기 위해 플레이스홀더로 스페이스 추가
@@ -83,11 +83,9 @@ class octo_lang: #lexer에 주석처리가 제대로 안되는 오류 발견
                 while match_word(' '):
                     space_tmp += 1
                     self.chr_pointer += 1
-                if len(self.tokens) > 0 and self.tokens[-1][0] == 'INDENT': #indent token이 중복해서 나타나는것 방지
+                if len(self.tokens) > 0 and self.tokens[-1][0] == 'INDENT':
                     self.tokens.pop()
                 self.tokens.append(['INDENT', space_tmp, self.line_tmp])
-                #주석이 처리되지 않는 문제 해결을 위한 처리
-                continue
             if self.code[self.chr_pointer] == '\n':
                 self.found_newline = True
             #워드 처리를 위한 내부 함수
@@ -237,33 +235,33 @@ class octo_lang: #lexer에 주석처리가 제대로 안되는 오류 발견
                         self.token = get_token()
                         continue
                     else:
-                        self.indent_data.pop()
-                        print('!')
-                        print(self.indent_data)
                         self.indent_data.append(self.token[1])
-                        print(self.indent_data)
-                        print(self.indent_data)
                         self.token = get_token()
-                        if self.token[0] == 'END':
-                            print('{0}번째 줄> 오류 : 완1전하게 정의되지 않은 함수 {1}'.format(self.token[2], self.parent_name_data[-1]))
+                        if self.token[0] == 'INDENT':
+                            print('poped')
+                            self.indent_data.pop()
+                            self.indent_data.append(self.token[1])
+                            print(self.indent_data)
+                            continue
+                        elif self.token[0] == 'END':
+                            print('{0}번째 줄> 오류 : 완전하게 정의되지 않은 함수 {1}'.format(self.token[2], self.parent_name_data[-1]))
                             sys.exit()
                         elif self.token[0] == 'DEFINE': #같은 단계의 함수
                             break
-                        else: #바깥 함수의 명령어로 인식하도록 수정, 현재 함수 끝내기
-                            print('{0}번째 줄> 오{1}류 : 들여쓰기'.format(self.token[2], self.parent_name_data[-1]))
-                            sys.exit()
+                        else: #main이 인식이 안 되게 만드는 부분이 이 부분 + 궁극적인 원인은 indent data 관리 실패, 코드를 찬찬히 읽어보기
+                            self.indent_data.pop()
+                            continue
+                            #print('{0}번째 줄> 오류 : 들여쓰기'.format(self.token[2]))
+                            #sys.exit()
                 elif self.token[0] == 'DEFINE':
                     indent_tmp = self.indent_data.pop()
+                    print('popp3d')
                     if indent_tmp > self.indent_data[-1]:
                         self.indent_data.append(indent_tmp)
-                        print(self.indent_data)
                         self.token = get_token()
                         process_function(nested = True)
                         continue
                     else:
-                        print('popp3d')
-                        print(self.indent_data)
-                        self.indent_data.pop()
                         break
                     #함수 인식 후처리
                 elif self.token[0] == 'RETURN':
@@ -275,7 +273,7 @@ class octo_lang: #lexer에 주석처리가 제대로 안되는 오류 발견
                     pass
                 elif self.token[0] == 'END':
                     if self.parent_data[-1][self.parent_name_data[-1]]['block'] == [] and self.parent_data[-1][self.parent_name_data[-1]]['nested_functions'] == {}:
-                        print('{0}번째 줄> 오류 : 완2전하게 정의되지 않은 함수 {1}'.format(self.token[2], self.parent_name_data[-1]))
+                        print('{0}번째 줄> 오류 : 완전하게 정의되지 않은 함수 {1}'.format(self.token[2], self.parent_name_data[-1]))
                         sys.exit()
                     else:
                         break
@@ -318,15 +316,6 @@ class octo_lang: #lexer에 주석처리가 제대로 안되는 오류 발견
                 sys.exit()
             self.token = get_token()
 
-def chech_lexer_output(tokens):
-    for t in tokens:
-        if t[0] == 'INDENT':
-            print('')
-            print(' ' * t[1], end = '')
-        else:
-            print('{0} '.format(t[1]), end = '')
-    print('')
-
 def check_structure(parse_tree, n):
     if n > 1:
         for k in parse_tree.keys():
@@ -341,8 +330,8 @@ def check_structure(parse_tree, n):
 
 with open('test.octo', 'r', encoding = 'utf-8') as f:
     code = f.read()
+    print(code)
 
 program = octo_lang(code)
-#print(program.tokens)
-chech_lexer_output(program.tokens)
-program.parse()
+print(program.tokens)
+#program.parse()
