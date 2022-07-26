@@ -1,6 +1,4 @@
-from inspect import Parameter
 import sys
-from textwrap import indent
 
 class octo_lang: #lexer에 주석처리가 제대로 안되는 오류 발견
 
